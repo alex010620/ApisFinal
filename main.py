@@ -16,7 +16,7 @@ def create_tuple(correo:str,clave:str):
     my_list = []
     Email=""
     Passw=""
-    conexion = sqlite3.connect("Fasth_Hospital1.s3db")
+    conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
     cursor.execute("SELECT idDoctor, Email, Clave FROM Doctores WHERE Email = '"+correo+"' and Clave = '"+clave+"'")
     contenido1 = cursor.fetchall()
@@ -40,7 +40,7 @@ def create_tuple(correo:str,clave:str):
 @app.get("/api/fecha/{fecha}")
 def fecha(fecha:str):
     datos=[]
-    conexion = sqlite3.connect("Fasth_Hospital1.s3db")
+    conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
     cursor.execute("SELECT Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota FROM Consulta WHERE Fecha = '"+fecha+"'")
     contenido = cursor.fetchall()
@@ -54,7 +54,7 @@ def fecha(fecha:str):
 @app.get("/api/idDoctor/{idDoctor}")
 def ConsultaCantidad(idDoctor:str):
     datos=[]
-    conexion = sqlite3.connect("Fasth_Hospital1.s3db")
+    conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
     sql="SELECT D.idDoctor, p.Cedula, p.Nombre, p.Apellido,p.Email,count(c.idPaciente) As Cantidad FROM Pacientes as p INNER JOIN Consulta as c on p.idPaciente = c.idPaciente INNER JOIN Doctores as D on D.idDoctor = c.idDoctor WHERE c.idDoctor = "+idDoctor+" GROUP by c.Paciente"
     cursor.execute(sql)
@@ -69,7 +69,7 @@ def ConsultaCantidad(idDoctor:str):
 @app.get("/api/zodiaco/{idDoctor}")
 def SignoZodiacal(idDoctor:str):
     datos=[]
-    conexion = sqlite3.connect("Fasth_Hospital1.s3db")
+    conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
     sql="SELECT Cedula, Nombre, Apellido, Zodiaco FROM Pacientes WHERE idDoctor = "+idDoctor+""
     cursor.execute(sql)
@@ -84,7 +84,7 @@ def SignoZodiacal(idDoctor:str):
 @app.get("/api/crear/{nombre}/{correo}/{clave}")
 def crear(nombre:str,correo:str,clave:str):
     try:
-        conexion=sqlite3.connect('Fasth_Hospital1.s3db')
+        conexion=sqlite3.connect('Hospital_Fast.s3db')
         registro=conexion.cursor()
         usuario=(nombre,correo,clave)
         sql='''INSERT INTO Doctores(Nombre,Email,Clave)VALUES(?,?,?)'''
@@ -99,7 +99,7 @@ def crear(nombre:str,correo:str,clave:str):
 @app.get("/api/Consulta/{idPaciente}/{idDoctor}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Monto_Pagado}/{Diagnostico}/{Nota}/{Foto_Evidencia}")
 def Consulta(idPaciente: str, idDoctor: str, Paciente: str, Fecha: str, Motivo_Consulta: str, Numero_Seguro: int, Monto_Pagado: int, Diagnostico:str, Nota:str,Foto_Evidencia:str):
     try:
-        conexion = sqlite3.connect('Fasth_Hospital1.s3db')
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
         cursor = conexion.cursor()
         usuario=(idPaciente,idDoctor,Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota,Foto_Evidencia)
         sql='''INSERT INTO Consulta(idPaciente,idDoctor,Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota,Foto_Evidencia)VALUES(?,?,?,?,?,?,?,?,?,?)'''
@@ -114,7 +114,7 @@ def Consulta(idPaciente: str, idDoctor: str, Paciente: str, Fecha: str, Motivo_C
 @app.get("/api/ActualizarConsulta/{idConsulta}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Diagnostico}/{Monto_Pagado}/{Nota}/{Foto_Evidencia}")
 def ActualizarConsulta(idConsulta:str, Paciente: str, Fecha: str, Motivo_Consulta: str, Numero_Seguro: str,Monto_Pagado:str, Diagnostico:str, Nota:str,Foto_Evidencia:str):
     try:
-        conexion = sqlite3.connect('Fasth_Hospital1.s3db')
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
         cursor = conexion.cursor()
         sql2="UPDATE Consulta SET Paciente='"+Paciente+"',Fecha='"+Fecha+"',Motivo_Consulta='"+Motivo_Consulta+"',Monto_Pagado='"+Monto_Pagado+"',Numero_Seguro='"+Numero_Seguro+"',Diagnostico='"+Diagnostico+"',Nota='"+Nota+"',Foto_Evidencia='"+Foto_Evidencia+"' WHERE idConsulta = '"+idConsulta+"'"
         cursor.execute(sql2)
@@ -130,7 +130,7 @@ Registro de pacientes
 @app.get("/api/Pacientes/{idDoctor}/{Cedula}/{Foto}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
 def crearPaciente(idDoctor:str,Cedula:str,Foto:str,Nombre:str,Apellido:str,Tipo_Sangre:str,Email:str,Sexo:str,Fecha_Nacimiento:str,Alergias:str,Zodiaco:str):
     try:
-        conexion=sqlite3.connect('Fasth_Hospital1.s3db')
+        conexion=sqlite3.connect('Hospital_Fast.s3db')
         registro=conexion.cursor()
         usuario=(idDoctor,Cedula,Foto,Nombre,Apellido,Tipo_Sangre,Email,Sexo,Fecha_Nacimiento,Alergias,Zodiaco)
         sql='''INSERT INTO Pacientes(idDoctor,Cedula,Foto,Nombre,Apellido,Tipo_Sangre,Email,Sexo,Fecha_Nacimiento,Alergias,Zodiaco)VALUES(?,?,?,?,?,?,?,?,?,?,?)'''
@@ -146,7 +146,7 @@ def crearPaciente(idDoctor:str,Cedula:str,Foto:str,Nombre:str,Apellido:str,Tipo_
 @app.get("/api/ActualizarPaciente/{idPaciente}/{Cedula}/{Foto}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
 def ActualizarPaciente(idPaciente:str,Cedula:str,Foto:str,Nombre:str,Apellido:str,Tipo_Sangre:str,Email:str,Sexo:str,Fecha_Nacimiento:str,Alergias:str,Zodiaco:str):
     try:
-        conexion=sqlite3.connect('Fasth_Hospital1.s3db')
+        conexion=sqlite3.connect('Hospital_Fast.s3db')
         registro=conexion.cursor()
         sql= "UPDATE Pacientes SET Cedula='"+Cedula+"',Foto='"+Foto+"',Nombre='"+Nombre+"',Apellido='"+Apellido+"',Tipo_Sangre='"+Tipo_Sangre+"',Email='"+Email+"',Sexo='"+Sexo+"',Fecha_Nacimiento='"+Fecha_Nacimiento+"',Alergias='"+Alergias+"',Zodiaco='"+Zodiaco+"' WHERE idPaciente="+idPaciente+""
         registro.execute(sql)
@@ -160,7 +160,7 @@ def ActualizarPaciente(idPaciente:str,Cedula:str,Foto:str,Nombre:str,Apellido:st
 @app.get("/api/modificar/{nombre}/{correo}/{token}")
 def modificar(nombre: str, correo: str, token: str):
     try:
-        conexion = sqlite3.connect('Fasth_Hospital1.s3db')
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
         cursor = conexion.cursor()
         update = "UPDATE Doctores SET Nombre = '"+nombre+"', Email = '"+correo+"' WHERE idDoctor = '"+token+"'"
         cursor.execute(update)
@@ -174,7 +174,7 @@ def modificar(nombre: str, correo: str, token: str):
 @app.get("/api/ModClave/{clave_old}/{token}/{nuw_clave}")
 def modClave(new_clave: str, clave_old: str, token: str):
     try:
-        conexion = sqlite3.connect('Fasth_Hospital1.s3db')
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
         cursor = conexion.cursor()
         updat = "UPDATE Doctores SET Clave ='"+new_clave+"' WHERE Clave = '"+clave_old+"' and idDoctor ='"+token+"'"
         cursor.execute(updat)
