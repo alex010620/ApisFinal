@@ -16,22 +16,28 @@ def create_tuple(correo:str,clave:str):
     my_list = []
     Email=""
     Passw=""
+    nombre=""
     conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
-    cursor.execute("SELECT idDoctor, Email, Clave FROM Doctores WHERE Email = '"+correo+"' and Clave = '"+clave+"'")
+    cursor.execute("SELECT idDoctor, Email, Clave, Sexo,Nombre FROM Doctores WHERE Email = '"+correo+"' and Clave = '"+clave+"'")
     contenido1 = cursor.fetchall()
     conexion.commit()
     for a in contenido1:
         idDoctor=a[0]
         Email=a[1]
         Passw = a[2]
+        Sexo=a[3]
+        nombre=a[4]
     if correo== Email and clave == Passw:
         cursor.execute("SELECT Cedula, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Foto,Zodiaco FROM Pacientes WHERE idDoctor = "+str(idDoctor)+" ")
         contenido = cursor.fetchall()
         conexion.commit()
         for i in contenido:
-            my_list.append({'doctor':idDoctor, 'CedulaPaciente':i[0],'NombrePaciente':i[1],'ApellidoPaciente':i[2],'Tipo_SangrePaciente':i[3],'EmailPaciente':i[4],'SexoPaciente':i[5],'Fecha_NacimientoPaciente':i[6],'AlergiasPaciente':i[7], 'Foto':i[8], 'Zodiaco':i[9]})
-        return my_list
+            my_list.append({"Datos del doctor":True,'doctor':idDoctor,'Sexo':Sexo, "Nombre":nombre, "Datos del paciente":True, 'CedulaPaciente':i[0],'NombrePaciente':i[1],'ApellidoPaciente':i[2],'Tipo_SangrePaciente':i[3],'EmailPaciente':i[4],'SexoPaciente':i[5],'Fecha_NacimientoPaciente':i[6],'AlergiasPaciente':i[7], 'Foto':i[8], 'Zodiaco':i[9]})
+        if my_list == []:
+            return {"respuesta":"Bienvenido "+nombre+""}
+        else:
+            return my_list
     else:
         return {'Ok':False}
 
@@ -81,18 +87,26 @@ def SignoZodiacal(idDoctor:str):
 
 #Registro de Doctores
 
-@app.get("/api/crear/{nombre}/{correo}/{clave}")
-def crear(nombre:str,correo:str,clave:str):
+@app.get("/api/crear/{nombre}/{correo}/{clave}/{sexo}")
+def crear(nombre:str,correo:str,clave:str,sexo:str):
     try:
+        pEmail=""
         conexion=sqlite3.connect('Hospital_Fast.s3db')
         registro=conexion.cursor()
-        usuario=(nombre,correo,clave)
-        sql='''INSERT INTO Doctores(Nombre,Email,Clave)VALUES(?,?,?)'''
-        registro.execute(sql,usuario)
-        conexion.commit()
-        return {"respuesta":"Los datos fueros registrados exitosamente"}
+        registro.execute("Select Email from Doctores where Email = '"+correo+"'")
+        contenido = registro.fetchall()
+        for i in contenido:
+            pEmail=i[0]
+        if correo == pEmail:
+            return {"respuesta":"El usuario con correo "+correo+" ya existe...", "Ok":False}
+        else:
+            usuario=(nombre,correo,clave,sexo)
+            sql='''INSERT INTO Doctores(Nombre,Email,Clave,Sexo)VALUES(?,?,?,?)'''
+            registro.execute(sql,usuario)
+            conexion.commit()
+            return {"respuesta":"Los datos fueros registrados exitosamente", "Ok":True}
     except TypeError:
-        return {"respuesta":"No se pudieron registrar los datos"}
+        return {"respuesta":"No se pudieron registrar los datos", "Ok":False}
 
 #Registro de consulta        
 

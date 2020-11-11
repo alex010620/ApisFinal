@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "env\\Scripts\\python.exe",
+    "python.pythonPath": "C:\\Users\\Dell\\AppData\\Local\\Programs\\Python\\Python39\\python.exe",
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true
 }
