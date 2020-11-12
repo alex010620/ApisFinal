@@ -35,7 +35,7 @@ def create_tuple(correo:str,clave:str):
         for i in contenido:
             my_list.append({"Datos del doctor":True,'doctor':idDoctor,'Sexo':Sexo, "Nombre":nombre, "Datos del paciente":True, 'CedulaPaciente':i[0],'NombrePaciente':i[1],'ApellidoPaciente':i[2],'Tipo_SangrePaciente':i[3],'EmailPaciente':i[4],'SexoPaciente':i[5],'Fecha_NacimientoPaciente':i[6],'AlergiasPaciente':i[7], 'Foto':i[8], 'Zodiaco':i[9]})
         if my_list == []:
-            return {"respuesta":"Bienvenido "+nombre+""}
+            return {"respuesta":"Bienvenido "+nombre+"", "Nombre":nombre, "id":idDoctor}
         else:
             return my_list
     else:
@@ -196,3 +196,5 @@ def modClave(new_clave: str, clave_old: str, token: str):
         return {"respuesta":"Se modificaron los datos"}
     except TypeError:
         return {"respuesta":"No se pudieron modificar los datos"}
+
+
