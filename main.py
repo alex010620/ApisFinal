@@ -193,11 +193,18 @@ def modificar(nombre: str, correo: str, token: str):
 
 #Modificacion de las credenciales del doctor
 
-@app.get("/api/ModClave/{clave_old}/{token}/{nuw_clave}")
+@app.get("/api/ModClave/{clave_old}/{token}/{new_clave}")
 def modClave(new_clave: str, clave_old: str, token: str):
     try:
         conexion = sqlite3.connect('Hospital_Fast.s3db')       
         cursor = conexion.cursor()
+        otherCursor = conexion.cursor()
+        select= "SELECT * FROM Doctores WHERE  idDoctor='"+token+"'"
+        otherCursor.execute(select)
+
+        if otherCursor.fetchall !=[]:
+        	if otherCursor.fetchall()[0][4] != clave_old:
+        		return {"ok":False,"respuesta":"Clave incorrecta"}
         updat = "UPDATE Doctores SET Clave ='"+new_clave+"' WHERE Clave = '"+clave_old+"' and idDoctor ='"+token+"'"
         cursor.execute(updat)
         conexion.commit()
