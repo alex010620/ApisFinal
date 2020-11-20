@@ -198,13 +198,13 @@ def modClave(new_clave: str, clave_old: str, token: str):
     try:
         conexion = sqlite3.connect('Hospital_Fast.s3db')       
         cursor = conexion.cursor()
+        otherCursor = conexion.cursor()
         select= "SELECT * FROM Doctores WHERE  idDoctor='"+token+"'"
-        cursor.execute(select)
+        otherCursor.execute(select)
 
-        if cursor.fetchall !=[]:
-        	if cursor.fetchall()[0][3] != clave_old:
-        		return {"ok":False,"respuesta":"Calve incorrecta"}
-                
+        if otherCursor.fetchall !=[]:
+        	if otherCursor.fetchall()[0][4] != clave_old:
+        		return {"ok":False,"respuesta":"Clave incorrecta"}
         updat = "UPDATE Doctores SET Clave ='"+new_clave+"' WHERE Clave = '"+clave_old+"' and idDoctor ='"+token+"'"
         cursor.execute(updat)
         conexion.commit()
