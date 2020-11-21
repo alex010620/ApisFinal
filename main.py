@@ -41,12 +41,12 @@ def create_tuple(correo: str, clave: str):
         nombre = a[4]
     if correo == Email and clave == Passw:
         cursor.execute(
-            "SELECT Cedula, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Foto,Zodiaco FROM Pacientes WHERE idDoctor = " + str(
+            "SELECT Cedula, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Foto,Zodiaco,idPaciente FROM Pacientes WHERE idDoctor = " + str(
                 idDoctor) + " ")
         contenido = cursor.fetchall()
         conexion.commit()
         for i in contenido:
-            my_list.append({"Datos del doctor": True, 'doctor': idDoctor, 'Sexo': Sexo, "Nombre": nombre,
+            my_list.append({"Datos del doctor": True,'idPaciente':i[10], 'doctor': idDoctor, 'Sexo': Sexo, "Nombre": nombre,
                             "Datos del paciente": True, 'CedulaPaciente': i[0], 'NombrePaciente': i[1],
                             'ApellidoPaciente': i[2], 'Tipo_SangrePaciente': i[3], 'EmailPaciente': i[4],
                             'SexoPaciente': i[5], 'Fecha_NacimientoPaciente': i[6], 'AlergiasPaciente': i[7],
