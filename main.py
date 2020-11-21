@@ -19,6 +19,16 @@ def root():
     return {'Sistema': 'Fast Hospital'}
 
 
+@app.get("prueba/{foto}/{idDoctor}")
+def prueva(foto:str,idDoctor:str):
+    conexion = sqlite3.connect('Hospital_Fast.s3db')
+    cursor = conexion.cursor()
+    sql="UPDATE Pacientes SET  Foto= '"+foto+"' WHERE idDoctor = '"+idDoctor+"'"
+    cursor.execute(sql)
+    conexion.commit()
+    return {"Se guardo la imagen"}
+
+
 # Inicio de session Solo se mostraran los pacientes registrados por el doctor que los registro...
 
 @app.get("/api/iniciar/{correo}/{clave}")
