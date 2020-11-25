@@ -148,7 +148,12 @@ def Consulta(idPaciente: str, idDoctor: str, Paciente: str, Fecha: str, Motivo_C
         sql = '''INSERT INTO Consulta(idPaciente,idDoctor,Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota,Foto_Evidencia)VALUES(?,?,?,?,?,?,?,?,?,?)'''
         cursor.execute(sql, usuario)
         conexion.commit()
-        return {"respuesta": "Los datos fueros registrados exitosamente"}
+
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
+        cursor = conexion.cursor()
+        data = cursor.execute('SELECT * from Consulta where  idPaciente ='+idPaciente+' ORDER BY idConsulta desc limit 1').fetchone()
+
+        return {"respuesta": "Los datos fueros registrados exitosamente","ok":True,"idConsulta":data[0]}
     except:
         return {"respuesta": "No se pudieron registrar los datos"}
 
@@ -203,7 +208,8 @@ def ActualizarConsulta(idConsulta: str, Paciente: str, Fecha: str, Motivo_Consul
         sql2 = "UPDATE Consulta SET Paciente='" + Paciente + "',Fecha='" + Fecha + "',Motivo_Consulta='" + Motivo_Consulta + "',Monto_Pagado='" + Monto_Pagado + "',Numero_Seguro='" + Numero_Seguro + "',Diagnostico='" + Diagnostico + "',Nota='" + Nota + "',Foto_Evidencia='" + Foto_Evidencia + "' WHERE idConsulta = '" + idConsulta + "'"
         cursor.execute(sql2)
         conexion.commit()
-        return {"respuesta": "Los datos fueros registrados exitosamente"}
+
+        return {"respuesta": "Los datos fueros registrados exitosamente", "ok":True}
     except EnvironmentError:
         return {"respuesta": "No se pudieron actualizar los datos"}
 
@@ -223,9 +229,17 @@ def crearPaciente(idDoctor: str, Cedula: str, Foto: str, Nombre: str, Apellido: 
         usuario = (
         idDoctor, Cedula, Foto, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Zodiaco)
         sql = '''INSERT INTO Pacientes(idDoctor,Cedula,Foto,Nombre,Apellido,Tipo_Sangre,Email,Sexo,Fecha_Nacimiento,Alergias,Zodiaco)VALUES(?,?,?,?,?,?,?,?,?,?,?)'''
-        registro.execute(sql, usuario)
+        r =registro.execute(sql, usuario)
         conexion.commit()
-        return {"respuesta": "Los datos fueros registrados exitosamente"}
+
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
+        cursor = conexion.cursor()
+        cursor.execute(
+            "SELECT * from Pacientes where Cedula = "+Cedula+" ORDER BY idPaciente DESC limit 1")
+        contenido = cursor.fetchone()
+
+
+        return {"ok":True, "idPaciente":contenido[0],"respuesta": "Los datos fueros registrados exitosamente"}
     except TypeError:
         return {"respuesta": "No se pudieron registrar los datos"}
 
