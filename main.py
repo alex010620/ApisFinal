@@ -1,7 +1,7 @@
 import sqlite3
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+import json
 app = FastAPI()
 origins = ["*"]
 
@@ -18,15 +18,6 @@ app.add_middleware(
 def root():
     return {'Sistema': 'Fast Hospital'}
 
-
-@app.get("prueba/{foto}/{idDoctor}")
-def prueva(foto:str,idDoctor:str):
-    conexion = sqlite3.connect('Hospital_Fast.s3db')
-    cursor = conexion.cursor()
-    sql="UPDATE Pacientes SET  Foto= '"+foto+"' WHERE idDoctor = '"+idDoctor+"'"
-    cursor.execute(sql)
-    conexion.commit()
-    return {"Se guardo la imagen"}
 
 
 # Inicio de session Solo se mostraran los pacientes registrados por el doctor que los registro...
@@ -64,7 +55,7 @@ def create_tuple(correo: str, clave: str):
         if my_list == []:
             return {"respuesta": "Bienvenido " + nombre + "", "Nombre": nombre, "id": idDoctor,"pacientes":[]}
         else:
-            return{"respuesta": "Bienvenido " + nombre + "", "Nombre": nombre, "id": idDoctor,"pacientes":my_list}
+            return{"respuesta": "Bienvenido " + nombre + "", "Nombre": nombre, "id": idDoctor,"Sexo": Sexo,"pacientes":my_list}
     else:
         return {'Ok': False}
 
@@ -145,8 +136,7 @@ def crear(nombre: str, correo: str, clave: str, sexo: str):
 
 # Registro de consulta
 
-@app.get(
-    "/api/Consulta/{idPaciente}/{idDoctor}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Monto_Pagado}/{Diagnostico}/{Nota}/{Foto_Evidencia}")
+@app.get("/api/Consulta/{idPaciente}/{idDoctor}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Monto_Pagado}/{Diagnostico}/{Nota}/{Foto_Evidencia}")
 def Consulta(idPaciente: str, idDoctor: str, Paciente: str, Fecha: str, Motivo_Consulta: str, Numero_Seguro: int,
              Monto_Pagado: int, Diagnostico: str, Nota: str, Foto_Evidencia: str):
     try:
@@ -161,6 +151,44 @@ def Consulta(idPaciente: str, idDoctor: str, Paciente: str, Fecha: str, Motivo_C
         return {"respuesta": "Los datos fueros registrados exitosamente"}
     except:
         return {"respuesta": "No se pudieron registrar los datos"}
+
+
+@app.get("/api/SeleccionarConsulta/{idPaciente}")
+def SeleccionarConsulta(idPaciente: str):
+    try:
+        lista=[]
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
+        cursor = conexion.cursor()
+        cursor.execute("SELECT Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota,Foto_Evidencia, idConsulta FROM Consulta WHERE idPaciente = '"+idPaciente+"'")
+        contenido= cursor.fetchall()
+        conexion.commit()
+        for i in contenido:
+            lista.append({"fecha":i[0],"motivoConsulta":i[1],"numeroSeguro":i[2],"montoPagado":i[3],"diagnostico":i[4],"nota":i[5],"evidencia":i[6], "idConsulta":i[7]})
+        if lista == []:
+            return {"respuesta":"El paciente no tiene citas generadas"}
+        else:
+            return lista
+    except:
+        return {"respuesta": "No se pudieron estraer los datos"}
+
+
+@app.get("/api/SeleccionarConsultaUnica/{idConsulta}")
+def SeleccionarConsultaUnica(idConsulta: str):
+    try:
+
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
+        cursor = conexion.cursor()
+        cursor.execute("SELECT Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota,Foto_Evidencia, idConsulta FROM Consulta WHERE idConsulta = '"+idConsulta+"'")
+        contenido= cursor.fetchall()
+        conexion.commit()
+        for i in contenido:
+            lista = {"fecha":i[0],"motivoConsulta":i[1],"numeroSeguro":i[2],"montoPagado":i[3],"diagnostico":i[4],"nota":i[5],"evidencia":i[6], "idConsulta":i[7]}
+        if lista == {}:
+            return {"respuesta":"El paciente no tiene citas generadas"}
+        else:
+            return lista
+    except:
+        return {"respuesta": "No se pudieron estraer los datos"}
 
 
 # Actualizar Consulta Paciente
