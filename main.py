@@ -195,6 +195,18 @@ def SeleccionarConsultaUnica(idConsulta: str):
     except:
         return {"respuesta": "No se pudieron estraer los datos"}
 
+@app.delete("/api/EliminarConsulta/{idConsulta}")
+def EliminarConsulta(idConsulta: str):
+    try:
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
+        cursor = conexion.cursor()
+        sql2 = "DELETE FROM Consulta WHERE idConsulta = '" + idConsulta + "'"
+        cursor.execute(sql2)
+        conexion.commit()
+        return {"respuesta": "Los datos fueros eliminados exitosamente", "ok":True}
+    except EnvironmentError:
+        return {"respuesta": "No se pudieron eliminar los datos"}
+
 
 # Actualizar Consulta Paciente
 
@@ -212,20 +224,6 @@ def ActualizarConsulta(idConsulta: str, Paciente: str, Fecha: str, Motivo_Consul
         return {"respuesta": "Los datos fueros registrados exitosamente", "ok":True}
     except EnvironmentError:
         return {"respuesta": "No se pudieron actualizar los datos"}
-
-
-@app.delete("/api/EliminarConsulta/{idConsulta}")
-def EliminarConsulta(idConsulta: str):
-    try:
-        conexion = sqlite3.connect('Hospital_Fast.s3db')
-        cursor = conexion.cursor()
-        sql2 = "DELETE FROM Consulta WHERE idConsulta = '" + idConsulta + "'"
-        cursor.execute(sql2)
-        conexion.commit()
-        return {"respuesta": "Los datos fueros eliminados exitosamente", "ok":True}
-    except EnvironmentError:
-        return {"respuesta": "No se pudieron eliminar los datos"}
-
 
 
 '''
