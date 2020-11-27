@@ -207,6 +207,19 @@ def EliminarConsulta(idConsulta: str):
     except EnvironmentError:
         return {"respuesta": "No se pudieron eliminar los datos"}
 
+@app.delete("/api/EliminarPacienteConsulta/{idPaciente}")
+def EliminarPacienteConsulta(idPaciente: str):
+    try:
+        conexion = sqlite3.connect('Hospital_Fast.s3db')
+        cursor = conexion.cursor()
+        sql2 = "DELETE FROM Consulta WHERE  idPaciente = '" + idPaciente + "'"
+        sql3 = "DELETE FROM Pacientes WHERE  idPaciente = '" + idPaciente + "'"
+        cursor.execute(sql2)
+        cursor.execute(sql3)
+        conexion.commit()
+        return {"respuesta": "Los datos fueros eliminados exitosamente", "ok":True}
+    except EnvironmentError:
+        return {"respuesta": "No se pudieron eliminar los datos"}
 
 # Actualizar Consulta Paciente
 
