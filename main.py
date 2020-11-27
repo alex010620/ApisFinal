@@ -249,10 +249,11 @@ Registro de pacientes
 def crearPaciente(idDoctor: str, Cedula: str, Foto: str, Nombre: str, Apellido: str, Tipo_Sangre: str, Email: str,
                   Sexo: str, Fecha_Nacimiento: str, Alergias: str, Zodiaco: str):
     try:
+        NuevaFoto = Foto.replace('-','/')
         conexion = sqlite3.connect('Hospital_Fast.s3db')
         registro = conexion.cursor()
         usuario = (
-        idDoctor, Cedula, Foto, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Zodiaco)
+        idDoctor, Cedula, NuevaFoto, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Zodiaco)
         sql = '''INSERT INTO Pacientes(idDoctor,Cedula,Foto,Nombre,Apellido,Tipo_Sangre,Email,Sexo,Fecha_Nacimiento,Alergias,Zodiaco)VALUES(?,?,?,?,?,?,?,?,?,?,?)'''
         r =registro.execute(sql, usuario)
         conexion.commit()
