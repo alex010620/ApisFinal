@@ -1,6 +1,7 @@
 import sqlite3
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import json
 app = FastAPI()
 origins = ["*"]
@@ -19,6 +20,8 @@ def root():
     return {'Sistema': 'Fast Hospital'}
 
 
+class Foto(BaseModel):
+    foto:str
 
 # Inicio de session Solo se mostraran los pacientes registrados por el doctor que los registro...
 
@@ -238,24 +241,21 @@ def ActualizarConsulta(idConsulta: str, Paciente: str, Fecha: str, Motivo_Consul
     except EnvironmentError:
         return {"respuesta": "No se pudieron actualizar los datos"}
 
-
 '''
 Registro de pacientes
 '''
 
-
-@app.get(
-    "/api/Pacientes/{idDoctor}/{Cedula}/{Foto}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
-def crearPaciente(idDoctor: str, Cedula: str, Foto: str, Nombre: str, Apellido: str, Tipo_Sangre: str, Email: str,
-                  Sexo: str, Fecha_Nacimiento: str, Alergias: str, Zodiaco: str):
+@app.post(
+    "/api/Pacientes/{idDoctor}/{Cedula}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
+def crearPaciente(idDoctor: str, Cedula: str,Nombre: str, Apellido: str, Tipo_Sangre: str, Email: str,
+                  Sexo: str, Fecha_Nacimiento: str, Alergias: str, Zodiaco: str, Foto: Foto):
     try:
-        NuevaFoto = Foto.replace('-','/')
         conexion = sqlite3.connect('Hospital_Fast.s3db')
         registro = conexion.cursor()
         usuario = (
-        idDoctor, Cedula, NuevaFoto, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Zodiaco)
+        idDoctor, Cedula, Foto.foto, Nombre, Apellido, Tipo_Sangre, Email, Sexo, Fecha_Nacimiento, Alergias, Zodiaco)
         sql = '''INSERT INTO Pacientes(idDoctor,Cedula,Foto,Nombre,Apellido,Tipo_Sangre,Email,Sexo,Fecha_Nacimiento,Alergias,Zodiaco)VALUES(?,?,?,?,?,?,?,?,?,?,?)'''
-        r =registro.execute(sql, usuario)
+        r = registro.execute(sql, usuario)
         conexion.commit()
 
         conexion = sqlite3.connect('Hospital_Fast.s3db')
