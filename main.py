@@ -56,7 +56,7 @@ def create_tuple(correo: str, clave: str):
                             'SexoPaciente': i[5], 'Fecha_NacimientoPaciente': i[6], 'AlergiasPaciente': i[7],
                             'Foto': i[8], 'Zodiaco': i[9]})
         if my_list == []:
-            return {"respuesta": "Bienvenido " + nombre + "", "Nombre": nombre, "id": idDoctor,"pacientes":[]}
+            return {"respuesta": "Bienvenido " + nombre + "", "Nombre": nombre,"Sexo":Sexo, "id": idDoctor,"pacientes":[]}
         else:
             return{"respuesta": "Bienvenido " + nombre + "", "Nombre": nombre, "id": idDoctor,"Sexo": Sexo,"pacientes":my_list}
     else:
@@ -65,13 +65,14 @@ def create_tuple(correo: str, clave: str):
 
 # Consulta para Visitas por fecha, podrá seleccionar una fecha y saldrá los pacientes que visitaron en esa fecha.
 
-@app.get("/api/fecha/{fecha}")
-def fecha(fecha: str):
+@app.get("/api/fecha/{fecha}/{id}")
+def fecha(fecha: str,idDoctor:int):
+    idDoctorString = idDoctor.__str__()
     datos = []
     conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
     cursor.execute(
-        "SELECT Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota FROM Consulta WHERE Fecha = '" + fecha + "'")
+        "SELECT Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota FROM Consulta WHERE idDoctor="+idDoctorString+" and Fecha = '" + fecha + "'")
     contenido = cursor.fetchall()
     conexion.commit()
     for i in contenido:
@@ -139,15 +140,15 @@ def crear(nombre: str, correo: str, clave: str, sexo: str):
 
 # Registro de consulta
 
-@app.get("/api/Consulta/{idPaciente}/{idDoctor}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Monto_Pagado}/{Diagnostico}/{Nota}/{Foto_Evidencia}")
+@app.post("/api/Consulta/{idPaciente}/{idDoctor}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Monto_Pagado}/{Diagnostico}/{Nota}")
 def Consulta(idPaciente: str, idDoctor: str, Paciente: str, Fecha: str, Motivo_Consulta: str, Numero_Seguro: int,
-             Monto_Pagado: int, Diagnostico: str, Nota: str, Foto_Evidencia: str):
+             Monto_Pagado: int, Diagnostico: str, Nota: str, Foto_Evidencia: Foto):
     try:
         conexion = sqlite3.connect('Hospital_Fast.s3db')
         cursor = conexion.cursor()
         usuario = (
         idPaciente, idDoctor, Paciente, Fecha, Motivo_Consulta, Numero_Seguro, Monto_Pagado, Diagnostico, Nota,
-        Foto_Evidencia)
+        Foto_Evidencia.foto)
         sql = '''INSERT INTO Consulta(idPaciente,idDoctor,Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota,Foto_Evidencia)VALUES(?,?,?,?,?,?,?,?,?,?)'''
         cursor.execute(sql, usuario)
         conexion.commit()
@@ -226,14 +227,13 @@ def EliminarPacienteConsulta(idPaciente: str):
 
 # Actualizar Consulta Paciente
 
-@app.get(
-    "/api/ActualizarConsulta/{idConsulta}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Diagnostico}/{Monto_Pagado}/{Nota}/{Foto_Evidencia}")
+@app.put("/api/ActualizarConsulta/{idConsulta}/{Paciente}/{Fecha}/{Motivo_Consulta}/{Numero_Seguro}/{Diagnostico}/{Monto_Pagado}/{Nota}")
 def ActualizarConsulta(idConsulta: str, Paciente: str, Fecha: str, Motivo_Consulta: str, Numero_Seguro: str,
-                       Monto_Pagado: str, Diagnostico: str, Nota: str, Foto_Evidencia: str):
+                       Monto_Pagado: str, Diagnostico: str, Nota: str, Foto_Evidencia: Foto):
     try:
         conexion = sqlite3.connect('Hospital_Fast.s3db')
         cursor = conexion.cursor()
-        sql2 = "UPDATE Consulta SET Paciente='" + Paciente + "',Fecha='" + Fecha + "',Motivo_Consulta='" + Motivo_Consulta + "',Monto_Pagado='" + Monto_Pagado + "',Numero_Seguro='" + Numero_Seguro + "',Diagnostico='" + Diagnostico + "',Nota='" + Nota + "',Foto_Evidencia='" + Foto_Evidencia + "' WHERE idConsulta = '" + idConsulta + "'"
+        sql2 = "UPDATE Consulta SET Paciente='" + Paciente + "',Fecha='" + Fecha + "',Motivo_Consulta='" + Motivo_Consulta + "',Monto_Pagado='" + Monto_Pagado + "',Numero_Seguro='" + Numero_Seguro + "',Diagnostico='" + Diagnostico + "',Nota='" + Nota + "',Foto_Evidencia='" + Foto_Evidencia.foto + "' WHERE idConsulta = '" + idConsulta + "'"
         cursor.execute(sql2)
         conexion.commit()
 
@@ -245,8 +245,7 @@ def ActualizarConsulta(idConsulta: str, Paciente: str, Fecha: str, Motivo_Consul
 Registro de pacientes
 '''
 
-@app.post(
-    "/api/Pacientes/{idDoctor}/{Cedula}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
+@app.post("/api/Pacientes/{idDoctor}/{Cedula}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
 def crearPaciente(idDoctor: str, Cedula: str,Nombre: str, Apellido: str, Tipo_Sangre: str, Email: str,
                   Sexo: str, Fecha_Nacimiento: str, Alergias: str, Zodiaco: str, Foto: Foto):
     try:
@@ -271,15 +270,15 @@ def crearPaciente(idDoctor: str, Cedula: str,Nombre: str, Apellido: str, Tipo_Sa
 
 
 # Actualizar paciente................
+@app.put(
+    "/api/ActualizarPaciente/{idPaciente}/{Cedula}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
+def ActualizarPaciente(idPaciente: str, Cedula: str, Nombre: str, Apellido: str, Tipo_Sangre: str,
+                       Email: str, Sexo: str, Fecha_Nacimiento: str, Alergias: str, Zodiaco: str,Foto:Foto):
 
-@app.get(
-    "/api/ActualizarPaciente/{idPaciente}/{Cedula}/{Foto}/{Nombre}/{Apellido}/{Tipo_Sangre}/{Email}/{Sexo}/{Fecha_Nacimiento}/{Alergias}/{Zodiaco}")
-def ActualizarPaciente(idPaciente: str, Cedula: str, Foto: str, Nombre: str, Apellido: str, Tipo_Sangre: str,
-                       Email: str, Sexo: str, Fecha_Nacimiento: str, Alergias: str, Zodiaco: str):
     try:
         conexion = sqlite3.connect('Hospital_Fast.s3db')
         registro = conexion.cursor()
-        sql = "UPDATE Pacientes SET Cedula='" + Cedula + "',Foto='" + Foto + "',Nombre='" + Nombre + "',Apellido='" + Apellido + "',Tipo_Sangre='" + Tipo_Sangre + "',Email='" + Email + "',Sexo='" + Sexo + "',Fecha_Nacimiento='" + Fecha_Nacimiento + "',Alergias='" + Alergias + "',Zodiaco='" + Zodiaco + "' WHERE idPaciente=" + idPaciente + ""
+        sql = "UPDATE Pacientes SET Cedula='" + Cedula + "',Foto='" + Foto.foto + "',Nombre='" + Nombre + "',Apellido='" + Apellido + "',Tipo_Sangre='" + Tipo_Sangre + "',Email='" + Email + "',Sexo='" + Sexo + "',Fecha_Nacimiento='" + Fecha_Nacimiento + "',Alergias='" + Alergias + "',Zodiaco='" + Zodiaco + "' WHERE idPaciente=" + idPaciente + ""
         registro.execute(sql)
         conexion.commit()
         return {"respuesta": "Los datos fueros actualizados exitosamente"}
