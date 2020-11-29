@@ -72,13 +72,13 @@ def fecha(fecha: str,idDoctor:int):
     conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
     cursor.execute(
-        "SELECT Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota FROM Consulta WHERE idDoctor="+idDoctorString+" and Fecha = '" + fecha + "'")
+        "SELECT Paciente,Fecha,Motivo_Consulta,Numero_Seguro,Monto_Pagado,Diagnostico,Nota,Foto_Evidencia FROM Consulta WHERE idDoctor="+idDoctorString+" and Fecha = '" + fecha + "'")
     contenido = cursor.fetchall()
     conexion.commit()
     for i in contenido:
         datos.append(
             {"Paciente": i[0], "Fecha": i[1], "Motivo_Consulta": i[2], "Numero_Seguro": i[3], "Monto_Pagado": i[4],
-             "Diagnostico": i[5], "Nota": i[6]})
+             "Diagnostico": i[5], "Nota": i[6],"Foto":i[7]})
     return datos
 
 
@@ -89,12 +89,13 @@ def ConsultaCantidad(idDoctor: str):
     datos = []
     conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
-    sql = "SELECT D.idDoctor, p.Cedula, p.Nombre, p.Apellido,p.Email,count(c.idPaciente) As Cantidad FROM Pacientes as p INNER JOIN Consulta as c on p.idPaciente = c.idPaciente INNER JOIN Doctores as D on D.idDoctor = c.idDoctor WHERE c.idDoctor = " + idDoctor + " GROUP by c.Paciente"
+    sql = "SELECT  D.idDoctor, p.Cedula, p.Nombre, p.Apellido,p.Email,count(c.idPaciente) As Cantidad, p.Foto FROM Pacientes as p INNER JOIN Consulta as c on p.idPaciente = c.idPaciente INNER JOIN Doctores as D on D.idDoctor = c.idDoctor" \
+          " WHERE c.idDoctor = "+idDoctor+"  GROUP by c.idPaciente"
     cursor.execute(sql)
     contenido = cursor.fetchall()
     conexion.commit()
     for i in contenido:
-        datos.append({"Cedula": i[1], "Nombre": i[2], "Apellido": i[3], "Email": i[4], "Cantidad": i[5]})
+        datos.append({"Cedula": i[1], "Nombre": i[2], "Apellido": i[3], "Email": i[4], "Cantidad": i[5],"Foto": i[6]})
     return datos
 
 
@@ -105,12 +106,12 @@ def SignoZodiacal(idDoctor: str):
     datos = []
     conexion = sqlite3.connect("Hospital_Fast.s3db")
     cursor = conexion.cursor()
-    sql = "SELECT Cedula, Nombre, Apellido, Zodiaco FROM Pacientes WHERE idDoctor = " + idDoctor + ""
+    sql = "SELECT Cedula, Nombre, Apellido, Zodiaco, Foto FROM Pacientes WHERE idDoctor = " + idDoctor + ""
     cursor.execute(sql)
     contenido = cursor.fetchall()
     conexion.commit()
     for i in contenido:
-        datos.append({"Cedula": i[0], "Nombre": i[1], "Apellido": i[2], "Zodiaco": i[3]})
+        datos.append({"Cedula": i[0], "Nombre": i[1], "Apellido": i[2], "Zodiaco": i[3],"Foto":i[4]})
     return datos
 
 
